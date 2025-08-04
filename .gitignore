@@ -1,0 +1,10 @@
+# .gitignore
+*.class
+*.csv
+*.log
+*.exe
+*.o
+*.out
+.DS_Store
+.idea/
+*.dSYM/
