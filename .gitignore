@@ -8,3 +8,7 @@
 .DS_Store
 .idea/
 *.dSYM/
+/target/
+*.db
+.DS_Store
+*.class
