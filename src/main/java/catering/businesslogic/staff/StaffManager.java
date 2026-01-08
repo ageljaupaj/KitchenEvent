@@ -1,5 +1,7 @@
 package catering.businesslogic.staff;
 
+import catering.businesslogic.event.Event;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,12 @@ public class StaffManager {
     public void valutaEvento(String evento, int punteggio, String commento) {
         ValutazioneEvento v = new ValutazioneEvento(evento, punteggio, commento);
         valutazioniEvento.add(v);
+    }
+
+    public ValutazioneVO valutaPostEvento(Organizzatore autore, Event e, Lavoratore l, int punteggio, String nota) {
+        ValutazioneVO v = new ValutazioneVO(e, autore, punteggio, nota, LocalDate.now());
+        this.valutaLavoratore(l, e.getName(), punteggio, nota);
+        return v;
     }
 
     // Metodi getter per test

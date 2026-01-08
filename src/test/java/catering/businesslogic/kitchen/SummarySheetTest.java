@@ -2,6 +2,7 @@ package catering.businesslogic.kitchen;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,12 +35,22 @@ import catering.util.LogManager;
 public class SummarySheetTest {
 
     private static final Logger LOGGER = LogManager.getLogger(SummarySheetTest.class);
+    private static final Random random = new Random();
 
     private static CatERing app;
     private static User chef;
     private static User cook;
     private static Event testEvent;
     private static Service testService;
+
+    private static String[] nomiCasuali = {"Marco", "Luca", "Elena", "Francesco", "Sofia", "Daniel", 
+                                           "Giulia", "Alessandro", "Martina", "Lorenzo", "Chiara", "Matteo"};
+    private static String[] eventiCasuali = {"Evento Test", "Evento Formale", "Conferenza IT", "Evento Demo",
+                                             "Gala di Fine Anno", "Meeting Aziendale", "Festa di Laurea"};
+    private static String[] commentiPositivi = {"Molto brava", "Eccellente", "Ottimo lavoro", "Prestazione superba",
+                                                "Tutto perfetto", "Ben fatto", "Sopra le aspettative"};
+    private static String[] motiviFerie = {"Motivi personali", "Visita medica", "Vacanza", "Impegni familiari",
+                                           "Appuntamento importante", "Necessita familiare"};
 
     @BeforeAll
     static void init() {
@@ -151,82 +162,115 @@ public class SummarySheetTest {
     @Order(3)
     void testRegistrazioneLavoratore() {
         StaffManager manager = new StaffManager();
-        Lavoratore l = manager.registraLavoratore("Marco");
+        String nomeCasuale = nomiCasuali[random.nextInt(nomiCasuali.length)];
+        Lavoratore l = manager.registraLavoratore(nomeCasuale);
 
         assertNotNull(l);
-        assertEquals("Marco", l.getNome());
+        assertEquals(nomeCasuale, l.getNome());
         assertFalse(l.isFerieRichieste());
         assertFalse(l.isFerieApprovate());
+        
+        LOGGER.info("Registrato lavoratore: " + nomeCasuale);
     }
 
     @Test
     @Order(4)
     void testRichiestaEApprovazioneFerie() {
         StaffManager manager = new StaffManager();
-        Lavoratore l = manager.registraLavoratore("Elena");
+        String nomeCasuale = nomiCasuali[random.nextInt(nomiCasuali.length)];
+        String motivoCasuale = motiviFerie[random.nextInt(motiviFerie.length)];
+        Lavoratore l = manager.registraLavoratore(nomeCasuale);
 
-        manager.richiediFerie(l, "Motivi personali");
+        manager.richiediFerie(l, motivoCasuale);
         assertTrue(l.isFerieRichieste());
-        assertEquals("Motivi personali", l.getMotivoFerie());
+        assertEquals(motivoCasuale, l.getMotivoFerie());
 
         manager.approvaFerie(l);
         assertTrue(l.isFerieApprovate());
+        
+        LOGGER.info("Ferie richieste e approvate per " + nomeCasuale + ": " + motivoCasuale);
     }
 
     @Test
     @Order(5)
     void testAssegnazioneEvento() {
         StaffManager manager = new StaffManager();
-        Lavoratore l = manager.registraLavoratore("Francesco");
+        String nomeCasuale = nomiCasuali[random.nextInt(nomiCasuali.length)];
+        String eventoCasuale = eventiCasuali[random.nextInt(eventiCasuali.length)];
+        Lavoratore l = manager.registraLavoratore(nomeCasuale);
 
-        manager.assegnaLavoratoreEvento(l, "Evento Test");
+        manager.assegnaLavoratoreEvento(l, eventoCasuale);
 
         assertEquals(1, manager.getAssegnazioni().size());
         Assegnazione a = manager.getAssegnazioni().get(0);
 
-        assertEquals("Evento Test", a.getNomeEvento());
-        assertEquals("Francesco", a.getLavoratore().getNome());
+        assertEquals(eventoCasuale, a.getNomeEvento());
+        assertEquals(nomeCasuale, a.getLavoratore().getNome());
+        
+        LOGGER.info("Assegnato " + nomeCasuale + " all'evento: " + eventoCasuale);
     }
 
     @Test
     @Order(6)
     void testValutazioneLavoratore() {
         StaffManager manager = new StaffManager();
-        Lavoratore l = manager.registraLavoratore("Sofia");
+        String nomeCasuale = nomiCasuali[random.nextInt(nomiCasuali.length)];
+        String eventoCasuale = eventiCasuali[random.nextInt(eventiCasuali.length)];
+        String commentoCasuale = commentiPositivi[random.nextInt(commentiPositivi.length)];
+        int punteggioCasuale = 3 + random.nextInt(3);
+        Lavoratore l = manager.registraLavoratore(nomeCasuale);
 
-        manager.valutaLavoratore(l, "Evento Formale", 4, "Molto brava");
+        manager.valutaLavoratore(l, eventoCasuale, punteggioCasuale, commentoCasuale);
 
         assertEquals(1, manager.getValutazioniLavoratori().size());
-        assertEquals("Sofia", manager.getValutazioniLavoratori().get(0).getLavoratore().getNome());
-        assertEquals(4, manager.getValutazioniLavoratori().get(0).getPunteggio());
+        assertEquals(nomeCasuale, manager.getValutazioniLavoratori().get(0).getLavoratore().getNome());
+        assertEquals(punteggioCasuale, manager.getValutazioniLavoratori().get(0).getPunteggio());
+        
+        LOGGER.info("Valutazione lavoratore: " + nomeCasuale + " per evento " + eventoCasuale + 
+                    ", punteggio: " + punteggioCasuale + ", commento: " + commentoCasuale);
     }
 
     @Test
     @Order(7)
     void testValutazioneEvento() {
         StaffManager manager = new StaffManager();
+        String eventoCasuale = eventiCasuali[random.nextInt(eventiCasuali.length)];
+        String commentoCasuale = commentiPositivi[random.nextInt(commentiPositivi.length)];
+        int punteggioCasuale = 4 + random.nextInt(2);
 
-        manager.valutaEvento("Conferenza IT", 5, "Tutto perfetto");
+        manager.valutaEvento(eventoCasuale, punteggioCasuale, commentoCasuale);
 
         assertEquals(1, manager.getValutazioniEvento().size());
-        assertEquals("Conferenza IT", manager.getValutazioniEvento().get(0).getNomeEvento());
-        assertEquals(5, manager.getValutazioniEvento().get(0).getPunteggio());
+        assertEquals(eventoCasuale, manager.getValutazioniEvento().get(0).getNomeEvento());
+        assertEquals(punteggioCasuale, manager.getValutazioniEvento().get(0).getPunteggio());
+        
+        LOGGER.info("Valutazione evento: " + eventoCasuale + 
+                    ", punteggio: " + punteggioCasuale + ", commento: " + commentoCasuale);
     }
 
     @Test
     @Order(8)
     void testRegistrarIntegrazione() {
         PersonnelRegistrar registrar = new PersonnelRegistrar();
-        Lavoratore l = registrar.registraLavoratore("Daniel");
+        String nomeCasuale = nomiCasuali[random.nextInt(nomiCasuali.length)];
+        String eventoCasuale = eventiCasuali[random.nextInt(eventiCasuali.length)];
+        String motivoCasuale = motiviFerie[random.nextInt(motiviFerie.length)];
+        String commentoCasuale = commentiPositivi[random.nextInt(commentiPositivi.length)];
+        int punteggioCasuale = 4 + random.nextInt(2);
+        Lavoratore l = registrar.registraLavoratore(nomeCasuale);
 
-        registrar.assegnaLavoratoreEvento(l, "Evento Demo");
-        registrar.richiediFerie(l, "Visita medica");
+        registrar.assegnaLavoratoreEvento(l, eventoCasuale);
+        registrar.richiediFerie(l, motivoCasuale);
         registrar.approvaFerie(l);
-        registrar.valutaLavoratore(l, "Evento Demo", 5, "Eccellente");
+        registrar.valutaLavoratore(l, eventoCasuale, punteggioCasuale, commentoCasuale);
 
         assertTrue(l.isFerieApprovate());
         assertEquals(1, registrar.getStaffManager().getAssegnazioni().size());
         assertEquals(1, registrar.getStaffManager().getValutazioniLavoratori().size());
+        
+        LOGGER.info("Test integrazione completato per " + nomeCasuale + 
+                    ": assegnato a " + eventoCasuale + ", ferie approvate per " + motivoCasuale + 
+                    ", valutazione " + punteggioCasuale + " con commento: " + commentoCasuale);
     }
 }
 
